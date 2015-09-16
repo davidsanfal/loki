@@ -25,127 +25,96 @@ int direction1Pin = 4;
 int speed2Pin = 6;
 int direction2Pin = 7;
 
-String inputString = "";         // a string to hold incoming data
-boolean stringComplete = false;  // whether the string is complete
-
-
-void setup(){
+void setup() {
 
   Serial.begin(19200);
 
-  // reserve 200 bytes for the inputString:
-  inputString.reserve(200);
 }
 
 void loop() {
-  serialEvent(); //call the function
-  // print the string when a newline arrives:
-  if (stringComplete) {
-    if(inputString == "r"){
+  while (Serial.available()) {
+    char inChar = (char)Serial.read();
+    //Serial.println(inputString);
+    if (inChar == 'r') {
       right();
     }
-    if(inputString == "l"){
+    if (inChar == 'l') {
       left();
     }
-    if(inputString == "f"){
+    if (inChar == 'f') {
       front();
     }
-    if(inputString == "b"){
+    if (inChar == 'b') {
       back();
     }
-    if(inputString == "c"){
+    if (inChar == 'c') {
       clockwise();
     }
-    if(inputString == "a"){
+    if (inChar == 'a') {
       counterclockwise();
     }
-    if(inputString == "s"){
+    if (inChar == 's') {
       stop_all();
     }
-    Serial.println(inputString);
-    // clear the string:
-    inputString = "";
-    stringComplete = false;
+    Serial.flush();
   }
 }
 
-/*
-  SerialEvent occurs whenever a new data comes in the
- hardware serial RX.  This routine is run between each
- time loop() runs, so using delay inside loop can delay
- response.  Multiple bytes of data may be available.
- */
-void serialEvent() {
-  while (Serial.available()) {
-    // get the new byte:
-    char inChar = (char)Serial.read();
-    // if the incoming character is a newline, set a flag
-    // so the main loop can do something about it:
-    if (inChar == '\n') {
-      stringComplete = true;
-    }
-    else{
-      // add it to the inputString:
-      inputString += inChar;
-    }
-  }
-}
-
-void front(){
+void front() {
   digitalWrite(direction1Pin, 0);
   analogWrite(speed1Pin, 255);
   digitalWrite(direction2Pin, 1);
   analogWrite(speed2Pin, 255);
   analogWrite(speed3Pin, 0);
-  }
+}
 
-void back(){
+void back() {
   digitalWrite(direction1Pin, 1);
   analogWrite(speed1Pin, 255);
   digitalWrite(direction2Pin, 0);
   analogWrite(speed2Pin, 255);
   analogWrite(speed3Pin, 0);
-  }
+}
 
-void stop_all(){
+void stop_all() {
   analogWrite(speed1Pin, 0);
   analogWrite(speed2Pin, 0);
   analogWrite(speed3Pin, 0);
-  }
-  
+}
 
-void left(){
+
+void left() {
   digitalWrite(direction1Pin, 1);
   analogWrite(speed1Pin, 125);
   digitalWrite(direction2Pin, 1);
   analogWrite(speed2Pin, 125);
   digitalWrite(direction3Pin, 0);
   analogWrite(speed3Pin, 255);
-  }
+}
 
-void right(){
+void right() {
   digitalWrite(direction1Pin, 0);
   analogWrite(speed1Pin, 125);
   digitalWrite(direction2Pin, 0);
   analogWrite(speed2Pin, 125);
   digitalWrite(direction3Pin, 1);
   analogWrite(speed3Pin, 255);
-  }
+}
 
-void clockwise(){
+void clockwise() {
   digitalWrite(direction1Pin, 0);
-  analogWrite(speed1Pin, 255);
+  analogWrite(speed1Pin, 150);
   digitalWrite(direction2Pin, 0);
-  analogWrite(speed2Pin, 255);
+  analogWrite(speed2Pin, 150);
   digitalWrite(direction3Pin, 0);
-  analogWrite(speed3Pin, 255);
-  }
+  analogWrite(speed3Pin, 150);
+}
 
-void counterclockwise(){
+void counterclockwise() {
   digitalWrite(direction1Pin, 1);
-  analogWrite(speed1Pin, 255);
+  analogWrite(speed1Pin, 150);
   digitalWrite(direction2Pin, 1);
-  analogWrite(speed2Pin, 255);
+  analogWrite(speed2Pin, 150);
   digitalWrite(direction3Pin, 1);
-  analogWrite(speed3Pin, 255);
-  }
+  analogWrite(speed3Pin, 150);
+}
