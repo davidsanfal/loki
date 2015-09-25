@@ -100,17 +100,35 @@ void combine_movements() {
       if (abs(speed_2) > abs(speed_1)) norm = abs(speed_2);
     }
   }
-
-  speed_0 = map(abs(speed_0/norm), 0, 1.0, 0, 255);
-  speed_1 = map(abs(speed_0/norm), 0, 1.0, 0, 255);
-  speed_2 = map(abs(speed_0/norm), 0, 1.0, 0, 255);
+  Serial.print(speed_X);
+  Serial.print(" ; ");
+  Serial.print(speed_Y);
+  Serial.print(" ; ");
+  Serial.println(speed_W);
+  Serial.print(speed_0);
+  Serial.print(" ; ");
+  Serial.print(speed_1);
+  Serial.print(" ; ");
+  Serial.println(speed_2);
+  set_speed(0, speed_0, norm);
+  set_speed(1, speed_1, norm);
+  set_speed(2, speed_2, norm);
 }
 
-void counterclockwise() {
-  digitalWrite(direction0Pin, 1);
-  analogWrite(speed0Pin, 150);
-  digitalWrite(direction2Pin, 1);
-  analogWrite(speed2Pin, 150);
-  digitalWrite(direction1Pin, 1);
-  analogWrite(speed1Pin, 150);
+void set_speed(int motor, float spd, float norm) {
+  int dir = 1;
+  if (spd < 0) dir = 0;
+  spd = map(abs(spd / norm), 0, 1.0, 0, 255);
+  switch (motor) {
+    case 0:
+      digitalWrite(direction0Pin, dir);
+      analogWrite(speed0Pin, spd);
+    case 1:
+      digitalWrite(direction1Pin, dir);
+      analogWrite(speed1Pin, spd);
+    case 2:
+      digitalWrite(direction2Pin, dir);
+      analogWrite(speed2Pin, spd);
+  }
 }
+
