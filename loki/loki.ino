@@ -24,10 +24,16 @@ int speed1Pin = 5;
 int direction1Pin = 4;
 int speed2Pin = 6;
 int direction2Pin = 7;
+int laserPin = 8;
+bool shot = false;
+bool shooting_up = false;
+unsigned long previousMillis = 0;
+const long interval = 1000;
 
 void setup() {
 
   Serial.begin(19200);
+  pinMode(laserPin, OUTPUT); 
 
 }
 
@@ -56,7 +62,33 @@ void loop() {
     if (inChar == 's') {
       stop_all();
     }
+    if (inChar == 'g') {
+      shot = true;
+    }
     Serial.flush();
+  }
+  gunshot();
+  Serial.println(analogRead(A0));
+}
+
+void gunshot() {
+  unsigned long currentMillis = millis();
+  if (shot) {
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      shooting_up = true;
+
+    }
+    shot = false;
+  }
+  if (shooting_up) {
+    if (currentMillis - previousMillis <= 500) {
+      digitalWrite(laserPin, 1); 
+    }
+    else{
+      shooting_up = false;
+      digitalWrite(laserPin, 0);
+      }
   }
 }
 
