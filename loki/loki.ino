@@ -4,9 +4,13 @@ int speed0Pin = 5;
 int direction0Pin = 4;
 int speed2Pin = 6;
 int direction2Pin = 7;
-int laserPin = 8;
+int laserPinRigth = 8;
+int laserPinLeft = 9;
+int ldrPin = A0;
 
 float arms_size = 110.74;
+
+int laser_impact = 210;
 
 float speed_0 = 0;
 float speed_1 = 0;
@@ -18,14 +22,16 @@ int shot = 0;
 
 bool shooting_up = false;
 unsigned long previousMillis = 0;
-const long interval = 1000;
-const long shot_interval = 500;
+const long interval = 0;
+const long shot_interval = 1000;
 boolean stringComplete = false;
 boolean startMessage = false;
+boolean weaponRigth = true;
 
 void setup() {
   Serial.begin(19200);
-  pinMode(laserPin, OUTPUT);
+  pinMode(laserPinRigth, OUTPUT);
+  pinMode(laserPinLeft, OUTPUT);
 }
 
 String read_string() {
@@ -74,9 +80,9 @@ void parse_string(String inputString) {
 }
 
 void combine_movements() {
-  speed_0 = (-speed_X / sin(PI / 3)) + (-speed_Y * cos(PI / 3)) + speed_W;
-  speed_1 = speed_Y + speed_W;
-  speed_2 = (speed_X / sin(PI / 3)) + (-speed_Y * cos(PI / 3)) + speed_W;
+  speed_0 = (-speed_X / sin(PI / 3)) + (-speed_Y * cos(PI / 3)) - speed_W;
+  speed_1 = speed_Y - speed_W;
+  speed_2 = (speed_X / sin(PI / 3)) + (-speed_Y * cos(PI / 3)) - speed_W;
   float norm = 1.0;
   if (abs(speed_0) > 1 || abs(speed_1) > 1 || abs(speed_2) > 1) {
     if (abs(speed_0) >= abs(speed_1)) {
@@ -97,7 +103,7 @@ void combine_movements() {
 void set_speed(int motor, float spd, float norm) {
   int dir = 1;
   if (spd < 0) dir = 0;
-  spd = map(abs(spd / norm)*100, 0.0, 100.0, 0, 255);
+  spd = map(abs(spd / norm) * 100, 0.0, 100.0, 0, 255);
   switch (motor) {
     case 0:
       digitalWrite(direction0Pin, dir);
@@ -122,13 +128,30 @@ void gunshot() {
   }
   if (shooting_up) {
     if (currentMillis - previousMillis <= shot_interval) {
-      digitalWrite(laserPin, 1);
+      if (weaponRigth) {
+        digitalWrite(laserPinRigth, 1);
+        digitalWrite(laserPinLeft, 0);;
+      }
+      else {
+        digitalWrite(laserPinLeft, 1);
+        digitalWrite(laserPinRigth, 0);
+      }
     }
     else {
+      weaponRigth = !weaponRigth;
       shooting_up = false;
-      digitalWrite(laserPin, 0);
     }
   }
+  else {
+    digitalWrite(laserPinRigth, 0);
+    digitalWrite(laserPinLeft, 0);
+  }
+}
+
+boolean shocked() {
+  int shocked  = analogRead(ldrPin);
+  if (shocked > laser_impact) return true;
+  else return false;
 }
 
 void loop() {
@@ -138,6 +161,7 @@ void loop() {
     parse_string(incoming);
     stringComplete = false;
   }
-  gunshot();
+  shot = 1;
+  //gunshot();
 }
 
