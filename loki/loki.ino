@@ -22,8 +22,11 @@ int shot = 0;
 
 bool shooting_up = false;
 unsigned long previousMillis = 0;
-const long interval = 0;
-const long shot_interval = 1000;
+unsigned long previousShotMillis = 0;
+unsigned long previousTimeoutMillis = 0;
+const long interval = 5000;
+const long shot_interval = 150;
+const long timeout_interval = 1000;
 boolean stringComplete = false;
 boolean startMessage = false;
 boolean weaponRigth = true;
@@ -120,17 +123,24 @@ void set_speed(int motor, float spd, float norm) {
 void gunshot() {
   unsigned long currentMillis = millis();
   if (shot > 0) {
-    if (currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;
+    if (currentMillis - previousMillis <= interval) {
       shooting_up = true;
+    }
+    else {
+      previousTimeoutMillis = currentMillis;
+      shooting_up = false;
     }
     shot = 0;
   }
+  else {
+    previousMillis = currentMillis;
+    shooting_up = false;
+  }
   if (shooting_up) {
-    if (currentMillis - previousMillis <= shot_interval) {
-      if (weaponRigth) {
+    if (currentMillis - previousShotMillis <= shot_interval) {
+      if (weaponRigth == true) {
         digitalWrite(laserPinRigth, 1);
-        digitalWrite(laserPinLeft, 0);;
+        digitalWrite(laserPinLeft, 0);
       }
       else {
         digitalWrite(laserPinLeft, 1);
@@ -138,11 +148,12 @@ void gunshot() {
       }
     }
     else {
+      previousShotMillis = currentMillis;
       weaponRigth = !weaponRigth;
-      shooting_up = false;
     }
   }
   else {
+    previousShotMillis = currentMillis;
     digitalWrite(laserPinRigth, 0);
     digitalWrite(laserPinLeft, 0);
   }
@@ -154,14 +165,29 @@ boolean shocked() {
   else return false;
 }
 
+void stop_robot() {
+  analogWrite(speed0Pin, 0);
+  analogWrite(speed1Pin, 0);
+  analogWrite(speed2Pin, 0);
+  digitalWrite(laserPinRigth, 1);
+  digitalWrite(laserPinLeft, 1);
+}
+
 void loop() {
-  String incoming;
-  if (Serial.available()) incoming = read_string();
-  if (stringComplete) {
-    parse_string(incoming);
-    stringComplete = false;
+  if (millis() - previousTimeoutMillis <= timeout_interval){
+    stop_robot();
+    shot = 0;
   }
-  shot = 1;
-  //gunshot();
+  else {
+    String incoming;
+    if (Serial.available()) incoming = read_string();
+    if (stringComplete) {
+      parse_string(incoming);
+      stringComplete = false;
+    }
+    gunshot();
+    shot = 1;
+    shooting_up = false;
+  }
 }
 
