@@ -1,3 +1,6 @@
+
+#include <Servo.h>
+
 int speed1Pin = 3;
 int direction1Pin = 2;
 int speed0Pin = 5;
@@ -6,6 +9,8 @@ int speed2Pin = 6;
 int direction2Pin = 7;
 int laserPinRigth = 8;
 int laserPinLeft = 9;
+int servoPinRigth = 10;
+int servoPinLeft = 11;
 int ldrPin = A0;
 
 float arms_size = 110.74;
@@ -31,10 +36,15 @@ boolean stringComplete = false;
 boolean startMessage = false;
 boolean weaponRigth = true;
 
+Servo servoRigth;
+Servo servoLeft;
+
 void setup() {
   Serial.begin(19200);
   pinMode(laserPinRigth, OUTPUT);
   pinMode(laserPinLeft, OUTPUT);
+  servoRigth.attach(servoPinRigth);
+  servoLeft.attach(servoPinLeft);
 }
 
 String read_string() {
@@ -174,20 +184,22 @@ void stop_robot() {
 }
 
 void loop() {
-  if (millis() - previousTimeoutMillis <= timeout_interval){
+  /*if (millis() - previousTimeoutMillis <= timeout_interval){
     stop_robot();
     shot = 0;
   }
-  else {
-    String incoming;
-    if (Serial.available()) incoming = read_string();
-    if (stringComplete) {
-      parse_string(incoming);
-      stringComplete = false;
-    }
-    gunshot();
-    shot = 1;
-    shooting_up = false;
+  else {*/
+  String incoming;
+  if (Serial.available()) incoming = read_string();
+  if (stringComplete) {
+    parse_string(incoming);
+    stringComplete = false;
   }
+  //gunshot();
+  //shot = 1;
+  //shooting_up = false;
+  servoRigth.write(85);
+  servoLeft.write(85);
+  //}
 }
 
