@@ -10,10 +10,10 @@ class Pathfinder(object):
 
     def __init__(self):
         self.motor_0_direction = Digital(33, 'out')
-        self.motor_0_speed = PWM(0)
         self.motor_1_direction = Digital(35, 'out')
-        self.motor_1_speed = PWM(1)
         self.motor_2_direction = Digital(37, 'out')
+        self.motor_0_speed = PWM(0)
+        self.motor_1_speed = PWM(1)
         self.motor_2_speed = PWM(2)
 
     def move(self, x, y, w):
