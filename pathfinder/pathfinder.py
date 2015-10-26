@@ -6,6 +6,7 @@ sys.path.append('/root/pybotics')
 from board.arietta.pin.digital import Digital
 from board.arietta.pin.pwm import PWM
 
+
 class Pathfinder(object):
 
     def __init__(self):
@@ -27,18 +28,17 @@ class Pathfinder(object):
             _motor_1 /= _max
             _motor_2 /= _max
         _d, _spd = self._parse_speed(_motor_0)
-        self.motor_0_direction.write( _d)
-	print _d, _spd
+        self.motor_0_direction.write(_d)
         self.motor_0_speed.duty_cycle = int(self.motor_0_speed.period * _spd)
 
         _d, _spd = self._parse_speed(_motor_1)
         print _d, _spd
-        self.motor_1_direction.write( _d)
+        self.motor_1_direction.write(_d)
         self.motor_1_speed.duty_cycle = int(self.motor_1_speed.period * _spd)
 
         _d, _spd = self._parse_speed(_motor_2)
         print _d, _spd
-        self.motor_2_direction.write( _d)
+        self.motor_2_direction.write(_d)
         self.motor_2_speed.duty_cycle = int(self.motor_2_speed.period * _spd)
 
     def _parse_speed(self, speed):
@@ -48,6 +48,3 @@ class Pathfinder(object):
             return 0, speed
         elif speed < 0:
             return 1, 1 + speed
-
-
-robot = Pathfinder()
