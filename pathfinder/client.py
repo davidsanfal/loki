@@ -12,7 +12,7 @@ keys = {'a': False,
         'e': False}
 
 s = socket.socket()
-s.connect(("192.168.10.10", 8090))
+s.connect(("172.16.17.26", 8090))
 pygame.init()
 WIDTH = 440
 HEIGHT = 440
@@ -31,8 +31,9 @@ while True:
             key = pygame.key.name(event.key)
             if key in keys.keys():
                 keys[key] = 1
+            s.send(json.dumps(keys))
         elif event.type == pygame.KEYUP:
             key = pygame.key.name(event.key)
             if key in keys.keys():
                 keys[key] = 0
-        s.send(json.dumps(keys))
+            s.send(json.dumps(keys))
