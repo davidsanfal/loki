@@ -16,9 +16,7 @@ while True:
     else:
         try:
             msg = json.loads(msg)
-            robot.move(msg['w']-msg['s'],
-                       msg['a']-msg['d'],
-                       msg['q']-msg['e'],)
+            robot.move(msg['x'], msg['y'], msg['w'],)
         except ValueError:
             pass
 
