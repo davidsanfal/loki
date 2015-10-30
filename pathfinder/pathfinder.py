@@ -16,6 +16,8 @@ class Pathfinder(object):
         self.motor_0_speed = PWM(0)
         self.motor_1_speed = PWM(1)
         self.motor_2_speed = PWM(2)
+        self.camera = PWM(3)
+        self.camera.duty_cycle = 700000
 
     def move(self, x, y, w):
         _motor_0 = -x * sin(pi/3) + (y * cos(pi/3)) + w
