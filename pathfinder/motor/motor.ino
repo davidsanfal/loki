@@ -1,4 +1,6 @@
 
+#include <Wire.h>
+
 int speed2Pin = 9;
 int direction2Pin = 6;
 int speed1Pin = 10;
@@ -11,10 +13,15 @@ float speed_1 = 0;
 float speed_2 = 0;
 float camera_position;
 
+String input;
+String incoming;
+
 boolean stringComplete = false;
 boolean startMessage = false;
 
 void setup() {
+  Wire.begin(8);
+  Wire.onReceive(receiveEvent); // register event
   Serial.begin(9600);
   pinMode(direction0Pin, OUTPUT);
   pinMode(direction1Pin, OUTPUT);
@@ -25,31 +32,29 @@ void setup() {
 }
 
 void loop() {
-  String incoming;
-  if (Serial.available()) incoming = read_string();
   if (stringComplete) {
+    Serial.println("PARSING...");
+    incoming = input;
     parse_string(incoming);
     stringComplete = false;
   }
 }
 
-String read_string() {
-  String inputString = "";
+void receiveEvent(int howMany) {
   char inChar;
-  while (Serial.available()) {
-    inChar = (char)Serial.read();
+  while (Wire.available()) {
+    inChar = Wire.read();
     if (inChar == ')') {
       startMessage = false;
       stringComplete = true;
-      inputString += ',';
+      input += ',';
     }
-    if (startMessage) inputString += inChar;
+    if (startMessage) input += inChar;
     if (inChar == '(' && !startMessage) startMessage = true;
-    if (inChar == '(' && startMessage) inputString = "";
+    if (inChar == '(' && startMessage) input = "";
     delay(3);
     if (stringComplete) break;
   }
-  return inputString;
 }
 
 void parse_string(String inputString) {
@@ -79,7 +84,11 @@ void parse_string(String inputString) {
   }
 
 
-
+  Serial.print(speed_0);
+  Serial.print(", ");
+  Serial.print(speed_1);
+  Serial.print(", ");
+  Serial.println(speed_2);
   set_speed(0, speed_0);
   set_speed(1, speed_1);
   set_speed(2, speed_2);
