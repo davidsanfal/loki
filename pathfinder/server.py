@@ -1,7 +1,6 @@
 import socket
 import json
 from pathfinder import Pathfinder
-import time
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(("172.16.17.26", 8090))
