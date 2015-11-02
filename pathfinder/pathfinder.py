@@ -20,6 +20,9 @@ class Pathfinder(object):
             _motor_1 /= _max
             _motor_2 /= _max
         msg = "(%.2f,%.2f,%.2f,0)" % (_motor_0, _motor_1, _motor_2)
-        for part in msg:
-            self.i2c_bus.write_byte(self.arduino, ord(part))
-        time.sleep(0.1)
+        try:
+            for part in msg:
+                self.i2c_bus.write_byte(self.arduino, ord(part))
+            time.sleep(0.1)
+        except:
+            pass
