@@ -2,6 +2,7 @@ import socket
 import pygame
 import sys
 import json
+import time
 
 
 def translate(value):
@@ -9,7 +10,7 @@ def translate(value):
     return value
 
 s = socket.socket()
-s.connect(("172.16.17.26", 8090))
+s.connect(("192.168.10.10", 8090))
 try:
     pygame.init()
     clock = pygame.time.Clock()
@@ -28,6 +29,7 @@ try:
         w = translate(-joystick.get_axis(2)) / 2
         clock.tick(50)
         s.send(json.dumps({'x': x, 'y': y, 'w': w}))
+        time.sleep(0.15)
 except KeyboardInterrupt:
     pygame.quit()
     s.send('quit')

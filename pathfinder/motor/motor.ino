@@ -22,7 +22,6 @@ boolean startMessage = false;
 void setup() {
   Wire.begin(8);
   Wire.onReceive(receiveEvent); // register event
-  Serial.begin(9600);
   pinMode(direction0Pin, OUTPUT);
   pinMode(direction1Pin, OUTPUT);
   pinMode(direction2Pin, OUTPUT);
@@ -33,7 +32,6 @@ void setup() {
 
 void loop() {
   if (stringComplete) {
-    Serial.println("PARSING...");
     incoming = input;
     parse_string(incoming);
     stringComplete = false;
@@ -58,8 +56,6 @@ void receiveEvent(int howMany) {
 }
 
 void parse_string(String inputString) {
-
-  Serial.println(inputString);
   int message_substring = 0;
   String substr = "";
   for (int i = 0 ; i < inputString.length(); i++) {
@@ -82,13 +78,6 @@ void parse_string(String inputString) {
     }
     else substr += (char)inputString[i];
   }
-
-
-  Serial.print(speed_0);
-  Serial.print(", ");
-  Serial.print(speed_1);
-  Serial.print(", ");
-  Serial.println(speed_2);
   set_speed(0, speed_0);
   set_speed(1, speed_1);
   set_speed(2, speed_2);
