@@ -4,13 +4,16 @@ import sys
 import json
 import time
 
+JOYSTICK_MAX = -32768
+JOYSTICK_MIN = 32767
+
 
 def translate(value):
-    value = value - (-32768 + 32767)/2 / (32767 + 32768) - 1
+    value = value - (JOYSTICK_MAX + JOYSTICK_MIN)/2 / (JOYSTICK_MIN - JOYSTICK_MAX) - 1
     return value
 
 s = socket.socket()
-s.connect(("192.168.10.10", 8090))
+s.connect(("172.16.17.26", 8090))
 try:
     pygame.init()
     clock = pygame.time.Clock()
