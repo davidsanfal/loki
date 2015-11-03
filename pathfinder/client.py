@@ -2,10 +2,14 @@ import socket
 import pygame
 import sys
 import json
+import time
+
+JOYSTICK_MAX = -32768
+JOYSTICK_MIN = 32767
 
 
 def translate(value):
-    value = value - (-32768 + 32767)/2 / (32767 + 32768) - 1
+    value = value - (JOYSTICK_MAX + JOYSTICK_MIN)/2 / (JOYSTICK_MIN - JOYSTICK_MAX) - 1
     return value
 
 s = socket.socket()
@@ -28,6 +32,7 @@ try:
         w = translate(-joystick.get_axis(2)) / 2
         clock.tick(50)
         s.send(json.dumps({'x': x, 'y': y, 'w': w}))
+        time.sleep(0.15)
 except KeyboardInterrupt:
     pygame.quit()
     s.send('quit')
