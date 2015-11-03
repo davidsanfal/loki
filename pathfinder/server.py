@@ -3,7 +3,7 @@ import json
 from pathfinder import Pathfinder
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("192.168.10.10", 8090))
+server.bind(("172.16.17.26", 8090))
 server.listen(1)
 robot = Pathfinder()
 robot.move(0, 0, 0)
