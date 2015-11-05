@@ -13,7 +13,7 @@ def translate(value):
     return value
 
 s = socket.socket()
-s.connect(("172.16.17.26", 8090))
+s.connect(("localhost", 5033))
 try:
     pygame.init()
     clock = pygame.time.Clock()
@@ -29,7 +29,7 @@ try:
                 sys.exit()
         y = translate(-joystick.get_axis(0))
         x = translate(-joystick.get_axis(1))
-        w = translate(-joystick.get_axis(2)) / 4
+        w = translate(-joystick.get_axis(2)) / 3
         clock.tick(50)
         s.send(json.dumps({'x': x, 'y': y, 'w': w}))
         time.sleep(0.15)
