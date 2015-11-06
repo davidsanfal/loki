@@ -8,12 +8,16 @@ TCP_IP = "172.16.17.26"
 
 
 def video(thread_event=None):
+    pathfinder_out = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                  'output',
+                                  'pathfinder.avi')
     stream = urllib.urlopen('http://%s:8080/?action=stream' % TCP_IP)
     frame = ''
     cv2.namedWindow('LOKI Pathfinder', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('LOKI Pathfinder', 640, 480)
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
-    video = cv2.VideoWriter('output/pathfinder.avi', fourcc, 15, (640, 480))
+    print os.getcwd()
+    video = cv2.VideoWriter(pathfinder_out, fourcc, 15, (640, 480))
     while True:
         if thread_event and thread_event.is_set():
             break
@@ -29,19 +33,20 @@ def video(thread_event=None):
             if cv2.waitKey(1) == 27:
                 break
     video.release()
-    face_recognice(os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                'output'
-                                'pathfinder.avi'))
+    face_recognice(pathfinder_out)
     cv2.destroyAllWindows()
 
 
 def face_recognice(original_video):
     print "face_recognice launched ..."
+    face_out = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                            'output',
+                            'face.avi')
     cascPath = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                             'haarcascade_frontalface_default.xml')
     faceCascade = cv2.CascadeClassifier(cascPath)
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
-    video = cv2.VideoWriter('output/face.avi', fourcc, 15, (640, 480))
+    video = cv2.VideoWriter(face_out, fourcc, 15, (640, 480))
     cap = cv2.VideoCapture(original_video)
     while(cap.isOpened()):
         _, frame = cap.read()
