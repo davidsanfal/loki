@@ -2,6 +2,8 @@
 
 A Loki robot developed to explore.
 
+![](loki.png)
+
 ## Hardware
 
 | Hardware  | Description |
