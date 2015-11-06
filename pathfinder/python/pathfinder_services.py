@@ -61,16 +61,6 @@ def robot_server(event=None):
 def video_server(event=None):
     print "video_server launched"
 
-    def recvall(sock, count):
-        buf = b''
-        while count:
-            newbuf = sock.recv(count)
-            if not newbuf:
-                return None
-            buf += newbuf
-            count -= len(newbuf)
-        return buf
-
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((TCP_IP, TCP_VIDEO_PORT))
     while True:

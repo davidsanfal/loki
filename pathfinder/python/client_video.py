@@ -3,7 +3,7 @@ import socket
 import cv2
 import numpy
 
-TCP_IP = 'localhost'
+TCP_IP = "172.16.17.26"
 TCP_PORT = 5034
 
 
