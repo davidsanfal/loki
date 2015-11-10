@@ -1,41 +1,34 @@
 import socket
-import pygame
-import sys
 import json
-
-JOYSTICK_MAX = -32768
-JOYSTICK_MIN = 32767
-
-TCP_IP = "172.16.17.26"
-TCP_PORT = 5033
+import pygame
 
 
-def translate(value):
-    value = value - (JOYSTICK_MAX + JOYSTICK_MIN)/2 / (JOYSTICK_MIN - JOYSTICK_MAX) - 1
-    return value
-
-
-def joystick(thread_event=None):
-
-    s = socket.socket()
-    s.connect((TCP_IP, TCP_PORT))
+def joystick_client(close_event=None, shot_event=None,
+                    ip="172.16.17.26", port=5033):
+    
     pygame.init()
-    clock = pygame.time.Clock()
     pygame.joystick.init()
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
+
+    s = socket.socket()
+    s.connect((ip, port))
     while True:
-        if thread_event and thread_event.is_set():
+        clock = pygame.time.Clock()
+        if close_event and close_event.is_set():
             break
-        for event in pygame.event.get():
-            if event.type == pygame.constants.QUIT:
-                break
-        y = translate(-joystick.get_axis(0))
-        x = translate(-joystick.get_axis(1))
-        w = translate(-joystick.get_axis(2)) / 3
+        for _ in pygame.event.get():
+            pass
         clock.tick(50)
-        s.send(json.dumps({'x': x, 'y': y, 'w': w}))
-    pygame.quit()
+        if joystick.get_button(0):
+            if shot_event:
+                shot_event.set()
+        y = float(-joystick.get_axis(0))
+        x = float(-joystick.get_axis(1))
+        w = float(-joystick.get_axis(2)) / 3
+        s.send(json.dumps({'x': x,
+                           'y': y,
+                           'w': w}))
     s.send('quit')
     s.close()
-    sys.exit()
+    pygame.quit()

@@ -2,24 +2,29 @@ import cv2
 import urllib
 import numpy as np
 import os
+import Image
+import zbar
+
+qr_url = []
+video_out = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                         'output',
+                         'pathfinder.avi')
 
 
-TCP_IP = "172.16.17.26"
-
-
-def video(thread_event=None):
-    pathfinder_out = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                  'output',
-                                  'pathfinder.avi')
-    stream = urllib.urlopen('http://%s:8080/?action=stream' % TCP_IP)
+def video(close_event=None, shot_event=None,
+          ip="172.16.17.26"):
+    stream = urllib.urlopen('http://%s:8080/?action=stream' % ip)
     frame = ''
     cv2.namedWindow('LOKI Pathfinder', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('LOKI Pathfinder', 640, 480)
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
-    print os.getcwd()
-    video = cv2.VideoWriter(pathfinder_out, fourcc, 15, (640, 480))
+    video = cv2.VideoWriter(video_out, fourcc, 15, (640, 480))
+
+    scanner = zbar.ImageScanner()
+    scanner.parse_config('enable')
+
     while True:
-        if thread_event and thread_event.is_set():
+        if close_event and close_event.is_set():
             break
         frame += stream.read(1024)
         a = frame.find('\xff\xd8')
@@ -31,14 +36,31 @@ def video(thread_event=None):
             video.write(img)
             cv2.imshow('LOKI Pathfinder', img)
             if cv2.waitKey(1) == 27:
-                break
+                pass
+            if shot_event and shot_event.is_set():
+                shot_event.clear()
+                qr_scanner(img, scanner)
+
     video.release()
-    face_recognice(pathfinder_out)
+    # face_recognice()
     cv2.destroyAllWindows()
 
 
-def face_recognice(original_video):
-    print "face_recognice launched ..."
+def qr_scanner(img, scanner):
+    img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
+    pil = Image.fromarray(img).convert('L')
+    width, height = pil.size
+    raw = pil.tostring()
+    image = zbar.Image(width, height, 'Y800', raw)
+    scanner.scan(image)
+    for symbol in image:
+        url = symbol.data
+        if url not in qr_url:
+            os.system("sensible-browser %s" % url)
+            qr_url.append(url)
+
+
+def face_recognice():
     face_out = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                             'output',
                             'face.avi')
@@ -47,8 +69,8 @@ def face_recognice(original_video):
     faceCascade = cv2.CascadeClassifier(cascPath)
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
     video = cv2.VideoWriter(face_out, fourcc, 15, (640, 480))
-    cap = cv2.VideoCapture(original_video)
-    while(cap.isOpened()):
+    cap = cv2.VideoCapture(video_out)
+    while cap.isOpened():
         _, frame = cap.read()
         if frame is None:
             break
