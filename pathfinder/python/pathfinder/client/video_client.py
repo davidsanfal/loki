@@ -5,7 +5,6 @@ import os
 import Image
 import zbar
 
-qr_url = []
 video_out = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                          'output',
                          'pathfinder.avi')
@@ -22,7 +21,7 @@ def video(close_event=None, shot_event=None,
 
     scanner = zbar.ImageScanner()
     scanner.parse_config('enable')
-
+    qr_url = []
     while True:
         if close_event and close_event.is_set():
             break
@@ -39,14 +38,16 @@ def video(close_event=None, shot_event=None,
                 pass
             if shot_event and shot_event.is_set():
                 shot_event.clear()
-                qr_scanner(img, scanner)
+                qr_scanner(img, scanner, qr_url)
+            else:
+                qr_url = []
 
     video.release()
     # face_recognice()
     cv2.destroyAllWindows()
 
 
-def qr_scanner(img, scanner):
+def qr_scanner(img, scanner, qr_url):
     img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
     pil = Image.fromarray(img).convert('L')
     width, height = pil.size
