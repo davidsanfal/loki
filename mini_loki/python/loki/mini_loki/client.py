@@ -10,7 +10,6 @@ def client(ip="loki.local", port=80):
     joystick.init()
     s = socket.socket()
     s.connect((ip, port))
-    print "Ready"
     while True:
         clock = pygame.time.Clock()
         for _ in pygame.event.get():

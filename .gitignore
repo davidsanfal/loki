@@ -87,3 +87,6 @@ local.properties
 *.avi
 *.fcstd1
 mini_loki/arduino/server/conf.h
+mini_loki/platformio/src/conf.h
+.pioenvs
+.sconsign.dblite
