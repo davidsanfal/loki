@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiClient.h>
-#include "conf.h"
-#include "mini_loki.h"
+#include "config.h"
+#include "miniloki/miniloki.h"
 
 
 //Board: Mi2 (https://github.com/bqlabs/Mi2)
@@ -40,7 +40,10 @@ void setup(void)
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
   //DNS configuration
-  if (!MDNS.begin("loki")) {
+  String DNS_name = init_swarm();
+  Serial.print("DNS_name: ");
+  Serial.println(DNS_name);
+  if (!MDNS.begin(DNS_name.c_str())) {
     Serial.println("Error setting up MDNS responder!");
     while (1) {
       delay(1000);
@@ -79,3 +82,30 @@ void loop(void)
   }
 }
 
+String init_swarm(){
+  String name;
+  WiFiClient client;
+  if (!client.connect(OVERMIND_IP, OVERMIND_PORT)) {
+    Serial.println("connection failed");
+  }
+  IPAddress   localAddr = WiFi.localIP();
+  byte oct1 = localAddr[0];
+  byte oct2 = localAddr[1];
+  byte oct3 = localAddr[2];
+  byte oct4 = localAddr[3];
+  char local_IP[16];  
+  sprintf(local_IP, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
+  String msg;
+  msg = "\"{\'ip\': \'" + (String)local_IP + "\'}\"";
+  client.print(msg);
+  while (!client.available()) {
+      delay(10);
+      Serial.print(".");
+    }
+  
+  while(client.available()){
+    name = client.readStringUntil('\n');
+  }
+  client.stop();
+  return name;
+}

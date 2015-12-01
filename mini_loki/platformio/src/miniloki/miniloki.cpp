@@ -1,29 +1,4 @@
-float speed_0 = 0;
-float speed_1 = 0;
-float speed_2 = 0;
-float speed_X = 0;
-float speed_Y = 0;
-float speed_W = 0;
-
-class MiniLoki {
-  public:
-    MiniLoki(int, int, int, int, int, int);
-    void parse_string(String);
-    void set_speed(int, float, float);
-  private:
-    float speed_0;
-    float speed_1;
-    float speed_2;
-    float speed_X;
-    float speed_Y;
-    float speed_W;
-    int speed0Pin;
-    int direction0Pin;
-    int speed1Pin;
-    int direction1Pin;
-    int speed2Pin;
-    int direction2Pin;
-};
+#include "miniloki.h"
 
 MiniLoki::MiniLoki(int spd0Pin, int dir0Pin, int spd1Pin, int dir1Pin, int spd2Pin, int dir2Pin) {
   speed0Pin = spd0Pin;
@@ -102,4 +77,3 @@ void MiniLoki::set_speed(int motor, float spd, float norm) {
       analogWrite(speed2Pin, spd);
   }
 }
-
