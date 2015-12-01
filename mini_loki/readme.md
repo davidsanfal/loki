@@ -1,6 +1,4 @@
-#Loki Pathfinder
-
-A Loki robot developed to explore.
+#Mini loki
 
 ![](loki.png)
 
