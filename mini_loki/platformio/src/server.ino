@@ -28,30 +28,17 @@ void setup(void)
   Serial.begin(115200);
   //Wifi configuration
   WiFi.begin(ssid, password);
-  Serial.println("");
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  //DNS configuration
-  String DNS_name = init_swarm();
-  Serial.print("DNS_name: ");
-  Serial.println(DNS_name);
+  String DNS_name = init_swarm("mini_loki");
+
   if (!MDNS.begin(DNS_name.c_str())) {
-    Serial.println("Error setting up MDNS responder!");
     while (1) {
       delay(1000);
     }
   }
-  Serial.println("mDNS responder started");
   server.begin();
-  Serial.println("TCP server started");
   MDNS.addService("http", "tcp", 80);
 
   //Pins configuration
@@ -69,7 +56,6 @@ void loop(void)
   if (!client) {
     return;
   }
-  Serial.print("Client connected");
   while (client.connected()) {
     while (client.available()) {
       input = client.readStringUntil('\n');
@@ -82,11 +68,11 @@ void loop(void)
   }
 }
 
-String init_swarm(){
+String init_swarm(String robot_name){
   String name;
   WiFiClient client;
-  if (!client.connect(OVERMIND_IP, OVERMIND_PORT)) {
-    Serial.println("connection failed");
+  while (!client.connect(OVERMIND_IP, OVERMIND_PORT)) {
+    delay(100);
   }
   IPAddress   localAddr = WiFi.localIP();
   byte oct1 = localAddr[0];
@@ -95,12 +81,16 @@ String init_swarm(){
   byte oct4 = localAddr[3];
   char local_IP[16];  
   sprintf(local_IP, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
-  String msg;
-  msg = "\"{\'ip\': \'" + (String)local_IP + "\'}\"";
+  String msg = "{";
+  msg += "\"ip\": ";msg += "\"";msg += (String)local_IP;msg += "\"";
+  msg += ",";
+  msg += "\"type\": ";msg += "\"";msg += robot_name;msg += "\"";
+  msg += ",";
+  msg += "\"chip_id\": ";msg += (String)ESP.getChipId();
+  msg += "}";
   client.print(msg);
   while (!client.available()) {
       delay(10);
-      Serial.print(".");
     }
   
   while(client.available()){

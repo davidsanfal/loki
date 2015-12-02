@@ -10,15 +10,18 @@ def client(ip="loki.local", port=80):
     joystick.init()
     s = socket.socket()
     s.connect((ip, port))
-    while True:
-        clock = pygame.time.Clock()
-        for _ in pygame.event.get():
-            pass
-        clock.tick(50)
-        y = float(joystick.get_axis(0))
-        x = float(joystick.get_axis(1))
-        w = float(joystick.get_axis(2))
-        s.send("%.2f,%.2f,%.2f,\n" % (x, y, w))
+    try:
+        while True:
+            clock = pygame.time.Clock()
+            for _ in pygame.event.get():
+                pass
+            clock.tick(50)
+            y = float(joystick.get_axis(0))
+            x = float(joystick.get_axis(1))
+            w = float(joystick.get_axis(2))
+            s.send("%.2f,%.2f,%.2f,\n" % (x, y, w))
+    except socket.error:
+        pass
     s.close()
     pygame.quit()
 

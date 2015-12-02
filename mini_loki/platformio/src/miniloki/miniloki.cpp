@@ -51,11 +51,6 @@ void MiniLoki::parse_string(String inputString) {
       if (abs(speed_2) > abs(speed_1)) norm = abs(speed_2);
     }
   }
-  Serial.print(speed_0 / norm);
-  Serial.print("    ");
-  Serial.print(speed_1 / norm);
-  Serial.print("    ");
-  Serial.println(speed_2 / norm);
   set_speed(0, speed_0, norm);
   set_speed(1, speed_1, norm);
   set_speed(2, speed_2, norm);
