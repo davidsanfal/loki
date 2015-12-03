@@ -10,10 +10,10 @@ close_all = False
 
 
 class MiThread(threading.Thread):
-    def __init__(self, service,
+    def __init__(self, service=None,
                  close_event=None,
-                 ip="172.16.17.136",
-                 port=5044):
+                 ip=None,
+                 port=None):
         threading.Thread.__init__(self)
         self.close_event = close_event
         self.service = service
@@ -26,7 +26,7 @@ class MiThread(threading.Thread):
 
 def overmind(ip):
     close_all = threading.Event()
-    organizer_thread = MiThread(organizer_server, close_all, ip)
+    organizer_thread = MiThread(organizer_server, close_all, ip, 5044)
     client_thread = MiThread(client, close_all, "loki_0.local", 80)
     organizer_thread.start()
     client_thread.start()

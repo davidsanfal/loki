@@ -6,13 +6,12 @@
 
 
 //Board: Mi2 (https://github.com/bqlabs/Mi2)
-
 #define SPEED_PIN_0 D8 //gpio 15 (pin 15)
 #define DIRECTION_PIN_0 D4 //gpio 2 (pin 12)
 #define SPEED_PIN_1 D2 //gpio 5 (pin 4)
 #define DIRECTION_PIN_1 D1 //gpio 4 (pin 5)
-#define SPEED_PIN_2 D6 //gpio 12 (pin SDA)
-#define DIRECTION_PIN_2 D5 //gpio 14 (pin SCK)
+#define SPEED_PIN_2 D7 //gpio 12 (pin SDA)
+#define DIRECTION_PIN_2 D0 //gpio 14 (pin SCK)
 
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;

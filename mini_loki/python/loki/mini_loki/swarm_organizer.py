@@ -13,11 +13,9 @@ def organizer_server(ip="172.16.17.57", port=5044, robots=None, close_event=None
             client.settimeout(2)
             try:
                 msg = client.recv(1024)
-                print repr(msg)
                 robot_dns = "loki_%s" % len(robots)
                 info = json.loads(msg)
                 robots[robot_dns] = info
-                print robots
                 client.send("%s\n" % robot_dns)
             except socket.timeout:
                 pass
