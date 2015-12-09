@@ -1,44 +1,66 @@
-from _collections import defaultdict
-import time
-import threading
-from mini_loki.swarm_organizer import organizer_server
-from mini_loki.client import client
+import socket
+import json
+from mini_loki import ping
 
 
-robots = defaultdict()
-close_all = False
+class Overmind(object):
+
+    def __init__(self):
+        self.agents = {}
+        self.references = {}
+
+    def run(self, ip):
+        try:
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.bind((ip, 5044))
+            server.settimeout(0.5)
+            while True:
+                try:
+                    server.listen(1)
+                    client, _ = server.accept()
+                    client.settimeout(2)
+                    try:
+                        self.register_agent(client)
+                    except (socket.timeout, socket.error):
+                        client.close()
+                except socket.timeout:
+                    self.review_agents()
+        except KeyboardInterrupt:
+            pass
+        server.close()
+
+    def register_agent(self, client):
+        msg = client.recv(1024)
+        info = json.loads(msg)
+        getattr(self, 'register_%s' % info['type'])(info, client)
+
+    def review_agents(self):
+        for agent in self.agents.keys():
+            print agent, ping.do_one(self.agents[agent]['ip'], 1)
 
 
-class MiThread(threading.Thread):
-    def __init__(self, service=None,
-                 close_event=None,
-                 ip=None,
-                 port=None):
-        threading.Thread.__init__(self)
-        self.close_event = close_event
-        self.service = service
-        self.ip = ip
-        self.port = port
+class LokiOvermind(Overmind):
 
-    def run(self):
-        self.service(self.ip, self.port, robots, self.close_event)
+    def register_mini_loki(self, info, client):
+        chip_id = info['chip_id']
+        dns_name = "loki_%s" % len(self.agents)
+        if chip_id in self.references.keys():
+            dns_name = self.references[chip_id]
+        else:
+            self.references[chip_id] = dns_name
+            self.agents[dns_name] = info
+        client.send("%s\n" % dns_name)
+        print "mini loki added: ", dns_name
+        print self.agents[dns_name]
 
-
-def overmind(ip):
-    close_all = threading.Event()
-    organizer_thread = MiThread(organizer_server, close_all, ip, 5044)
-    client_thread = MiThread(client, close_all, "loki_0.local", 80)
-    organizer_thread.start()
-    client_thread.start()
-    try:
-        while True:
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        close_all.set()
-        organizer_thread.join()
-        client_thread.join()
-
+    def register_client(self, info, client):
+        loki_info = json.dumps({'loki_0': None})
+        if 'loki_0' in self.agents.keys():
+            self.agents['client'] = info
+            loki_info = json.dumps({'loki_0': self.agents['loki_0']['ip']})
+        print loki_info
+        client.send(loki_info)
 
 if __name__ == '__main__':
-    overmind("172.16.17.57")
-    print robots
+    overmind = LokiOvermind()
+    overmind.run("172.16.17.75")

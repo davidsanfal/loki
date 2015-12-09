@@ -1,16 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiClient.h>
-#include <Wire.h>
 #include "config.h"
 #include "miniloki/miniloki.h"
-#include "BNO055.h"
-#include <Wire.h>
-
-#define A 0X28  //I2C address selection pin LOW
-#define B 0x29  //                          HIGH
-
-BNO055 mySensor(B);
 
 //Board: Mi2 (https://github.com/bqlabs/Mi2)
 #define SPEED_PIN_0 D8 //gpio 15 (pin 15)
@@ -32,10 +24,7 @@ MiniLoki loki(SPEED_PIN_0, DIRECTION_PIN_0,
 
 void setup(void)
 { 
-  Wire.begin(12, 14);
-  Wire.setClock(100000);
   Serial.begin(9600);
-  mySensor.init();
   //Wifi configuration
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -64,12 +53,8 @@ void loop(void)
 {
   WiFiClient client = server.available();
   if (!client) {
-    return;
-  }
+      }
   while (client.connected()) {
-    mySensor.readEul();
-    Serial.print("Yaw (dg): "); Serial.print(mySensor.euler.x); Serial.print("  Roll (dg): "); Serial.print(mySensor.euler.y); Serial.print("  Pitch (dg): "); Serial.println(mySensor.euler.z);
-
     while (client.available()) {
       input = client.readStringUntil('\n');
       stringComplete = true;
