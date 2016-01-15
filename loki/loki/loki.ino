@@ -1,6 +1,8 @@
 
 #include <Servo.h>
 
+/* Arduino pin list */
+
 int speed1Pin = 3;
 int direction1Pin = 2;
 int speed0Pin = 5;
@@ -13,9 +15,15 @@ int servoPinRigth = 10;
 int servoPinLeft = 11;
 int ldrPin = A0;
 
+/* Distance between the center and the wheel's axis  */
+
 float arms_size = 110.74;
 
+/* LDR threshold */
+
 int laser_impact = 210;
+
+/* Other variables */
 
 float speed_0 = 0;
 float speed_1 = 0;
@@ -47,6 +55,21 @@ void setup() {
   servoLeft.attach(servoPinLeft);
 }
 
+/*
+Read a string from the serial port bluetooth with the following structure:
+(speed_X;speed_Y;speed_W;shot)
+
+speed_X = -1.00 to 1.00 Float with two decimal
+speed_Y = -1.00 to 1.00 Float with two decimal
+speed_W = -1.00 to 1.00 Float with two decimal
+shot = 0 or 1 Int
+
+This fuction save in inputString a string with the following structure:
+speed_X;speed_Y;speed_W;shot;
+
+stringComplete = true when a complete message is received.
+*/
+
 String read_string() {
   String inputString = "";
   char inChar;
@@ -65,6 +88,12 @@ String read_string() {
   }
   return inputString;
 }
+
+/*
+Parse the inputString string and update speed_X, speed_Y, speed_W and shot.
+
+At the end, calls combine_movements() to convert the movement in (X, Y, W) to wheels speed.
+*/
 
 void parse_string(String inputString) {
   int message_substring = 0;
@@ -92,10 +121,18 @@ void parse_string(String inputString) {
   combine_movements();
 }
 
+/*
+Convert the movement in (X, Y, W) to wheels speed.
+
+http://www.inescporto.pt/~hfpo/papers/Oliveira_CRCS_INTECH.pdf-> equation(2)
+
+At the end, calls set_speed() to set the new wheels speed normalized (-1 to 1). 
+*/
+
 void combine_movements() {
-  speed_0 = (-speed_X / sin(PI / 3)) + (-speed_Y * cos(PI / 3)) - speed_W;
-  speed_1 = speed_Y - speed_W;
-  speed_2 = (speed_X / sin(PI / 3)) + (-speed_Y * cos(PI / 3)) - speed_W;
+  speed_0 = (-speed_X * sin(PI / 3)) + (speed_Y * cos(PI / 3)) + speed_W;
+  speed_1 = -speed_Y + speed_W;
+  speed_2 = (speed_X * sin(PI / 3)) + (speed_Y * cos(PI / 3)) + speed_W;
   float norm = 1.0;
   if (abs(speed_0) > 1 || abs(speed_1) > 1 || abs(speed_2) > 1) {
     if (abs(speed_0) >= abs(speed_1)) {
@@ -113,6 +150,10 @@ void combine_movements() {
   set_speed(2, speed_2, norm);
 }
 
+/*
+Set wheel speeds using a https://www.pololu.com/product/2990
+*/
+
 void set_speed(int motor, float spd, float norm) {
   int dir = 1;
   if (spd < 0) dir = 0;
@@ -129,6 +170,12 @@ void set_speed(int motor, float spd, float norm) {
       analogWrite(speed2Pin, spd);
   }
 }
+
+/*
+EXPEROIMENTAL (never used)
+
+Function to fire the laser with regular intervals.
+*/
 
 void gunshot() {
   unsigned long currentMillis = millis();
@@ -169,6 +216,12 @@ void gunshot() {
   }
 }
 
+/*
+EXPEROIMENTAL (never used)
+
+Function to determine if the robot is hit.
+*/
+
 boolean shocked() {
   int shocked  = analogRead(ldrPin);
   if (shocked > laser_impact) return true;
@@ -184,17 +237,20 @@ void stop_robot() {
 }
 
 void loop() {
+  // EXPEROIMENTAL (never used): If you use continuously the laser, the robot stop for a while
   /*if (millis() - previousTimeoutMillis <= timeout_interval){
     stop_robot();
     shot = 0;
   }
   else {*/
+  //Read and parse the input string
   String incoming;
   if (Serial.available()) incoming = read_string();
   if (stringComplete) {
     parse_string(incoming);
     stringComplete = false;
   }
+  // EXPEROIMENTAL (never used)
   //gunshot();
   //shot = 1;
   //shooting_up = false;
